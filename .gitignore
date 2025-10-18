@@ -1,0 +1,12 @@
+.env*
+!.env.dist
+config/*
+!config/.gitkeep
+misc/*
+!misc/.gitkeep
+plugins/*
+!plugins/.gitkeep
+tmp/*
+!tmp/.gitkeep
+db/*
+!db/.gitkeep

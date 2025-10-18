@@ -1,0 +1,61 @@
+name: '${APPLICATION_NAME}'
+services:
+    dbmatomo:
+        container_name: ${DBMATOMO_CONTAINER_NAME}
+        image: ${BASE_IMAGE_DB}
+        command: --max-allowed-packet=64MB
+        volumes:
+            - ${HOST_DBMATOMO_PATH}:/var/lib/mysql/
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DBMATOMO_ROOT_PASSWORD}
+            MYSQL_USER: ${DBMATOMO_USER}
+            MYSQL_PASSWORD: ${DBMATOMO_PASSWORD}
+            MYSQL_DATABASE: ${DBMATOMO_NAME}
+        networks:
+            - pma_network
+        logging:
+            driver: "json-file"
+            options:
+                max-size: 10m
+                max-file: 3
+        restart: unless-stopped
+
+    matomo:
+        container_name: ${MATOMO_CONTAINER_NAME}
+        image: ${BASE_IMAGE_MATOMO}
+        environment:
+            - MATOMO_DATABASE_HOST=dbmatomo
+            - MATOMO_DATABASE_USERNAME=${DBMATOMO_USER}
+            - MATOMO_DATABASE_PASSWORD=${DBMATOMO_PASSWORD}
+            - MATOMO_DATABASE_DBNAME=${DBMATOMO_NAME}
+            - MATOMO_DATABASE_ADAPTER=mysql
+            - MATOMO_DATABASE_TABLES_PREFIX=piwik_
+        volumes:
+            - ./config:/var/www/html/config
+            - ./plugins:/var/www/html/plugins
+            - ./misc:/var/www/html/misc
+            - ./tmp:/var/www/html/tmp
+        depends_on:
+            - dbmatomo
+        networks:
+            - traefiknetwork
+        logging:
+            driver: "json-file"
+            options:
+                max-size: 10m
+                max-file: 3
+        restart: unless-stopped
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.matomo.rule=Host(`${MATOMO_DOMAIN_NAME}`)"
+            - "traefik.http.routers.matomo.entrypoints=websecure"
+            - "traefik.http.routers.matomo.tls=true"
+            - "traefik.http.routers.matomo.tls.certresolver=myresolver"
+
+networks:
+    pma_network:
+        name: pma_network
+        external: true
+    traefiknetwork:
+        name: traefiknetwork
+        external: true
