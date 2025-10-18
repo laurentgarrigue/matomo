@@ -10,3 +10,4 @@ tmp/*
 !tmp/.gitkeep
 db/*
 !db/.gitkeep
+backups/
