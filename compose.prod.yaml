@@ -13,6 +13,7 @@ services:
             MYSQL_DATABASE: ${DBMATOMO_NAME}
         networks:
             - pma_network
+            - matomo_network
         logging:
             driver: "json-file"
             options:
@@ -39,6 +40,7 @@ services:
             - dbmatomo
         networks:
             - traefiknetwork
+            - matomo_network
         logging:
             driver: "json-file"
             options:
@@ -55,6 +57,9 @@ services:
 networks:
     pma_network:
         name: pma_network
+        external: true
+    matomo_network:
+        name: matomo_network
         external: true
     traefiknetwork:
         name: traefiknetwork
